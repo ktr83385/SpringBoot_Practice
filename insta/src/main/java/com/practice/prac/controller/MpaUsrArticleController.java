@@ -1,8 +1,8 @@
 package com.practice.prac.controller;
 
 import com.practice.prac.domain.Article;
+import com.practice.prac.dto.ResultData;
 import com.practice.prac.util.Util;
-import lombok.Data;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -43,6 +43,30 @@ public class MpaUsrArticleController {
         return new ResultData("S-1", id + "번 글이 등록되었습니다.", article);
     }
 
+
+    @RequestMapping("/mpaUsr/article/getArticle")
+    @ResponseBody
+    public ResultData getArticle(int id) {
+        Article article = getArticleById(id);
+        if (article == null) {
+            return new ResultData("F-1", id + "번 글은 존재하지 않습니다.", article);
+        }
+
+        return new ResultData("S-1", article.getId() + "번 글 입니다.", article);
+    }
+
+    @RequestMapping("/mpaUsr/article/doDelete")
+    @ResponseBody
+    public ResultData doDelete(int id) {
+        boolean deleted = deleteArticleById(id);
+
+        if (deleted == false) {
+            return new ResultData("F-1", id + "번 글이 없습니다.");
+        }
+
+        return new ResultData("S-1", id + "번 글이 삭제되었습니다.");
+    }
+
     private int writeArticle(String title, String body) {
         int id = articleLastId + 1;
         String regDate = Util.getNowDateStr();
@@ -56,59 +80,22 @@ public class MpaUsrArticleController {
         return id;
     }
 
-    @RequestMapping("/mpaUsr/article/getArticle")
-    @ResponseBody
-    public ResultData getArticle(int id) {
-        Article article = getArticleById(id);
-        if (article == null) {
-            return new ResultData("F-1", id + "번 글은 존재하지 않습니다.", article);
-        }
-
-        return new ResultData("S-1", article.getId() + "번 글 입니다.", article);
-    }
-
     private Article getArticleById(int id) {
-        if (id > articles.size()) {
-            return null;
+        for (Article article : articles) {
+            if (article.getId() == id) {
+                return article;
+            }
         }
-        Article article = articles.get(id-1);
-
-        return article;
-    }
-}
-
-class ResultData {
-    private String resultData;
-    private String msg;
-    private Article article;
-
-    public ResultData(String resultData, String msg, Article article) {
-        this.resultData = resultData;
-        this.msg = msg;
-        this.article = article;
+        return null;
     }
 
-    public String getResultData() {
-        return resultData;
-    }
-
-    public void setResultData(String resultData) {
-        this.resultData = resultData;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public Article getArticle() {
-        return article;
-    }
-
-    public void setArticle(Article article) {
-        this.article = article;
+    private boolean deleteArticleById(int id) {
+        for (Article article : articles) {
+            if (article.getId() == id) {
+                articles.remove(article);
+                return true;
+            }
+        }
+        return false;
     }
 }
